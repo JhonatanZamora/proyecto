@@ -1,20 +1,25 @@
 package co.edu.uniquindio.proyecto.domain.valueobject;
 
-import java.util.Set;
+/**
+ * Nivel de urgencia de una solicitud académica.
+ *
+ * Es un enum porque los valores son un catálogo cerrado y conocido.
+ * El compilador garantiza que nunca existirá una Prioridad inválida.
+ */
+public enum Prioridad {
 
-public record Prioridad(String nivel) {
+    ALTA("Alta prioridad — atención inmediata"),
+    MEDIA("Prioridad media — atención normal"),
+    BAJA("Baja prioridad — atención cuando sea posible");
 
-    private static final Set<String> PRIORIDADES_VALIDAS = Set.of(
-            "ALTA", "MEDIA", "BAJA"
-    );
+    // Descripción legible para mostrar en la interfaz
+    private final String descripcion;
 
-    public Prioridad {
-        if (nivel == null || nivel.isBlank()) {
-            throw new IllegalArgumentException("La prioridad no puede estar vacía");
-        }
+    Prioridad(String descripcion) {
+        this.descripcion = descripcion;
+    }
 
-        if (!PRIORIDADES_VALIDAS.contains(nivel)) {
-            throw new IllegalArgumentException("Prioridad inválida");
-        }
+    public String getDescripcion() {
+        return descripcion;
     }
 }

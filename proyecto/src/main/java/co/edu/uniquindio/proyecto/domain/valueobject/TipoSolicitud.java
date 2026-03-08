@@ -1,24 +1,32 @@
 package co.edu.uniquindio.proyecto.domain.valueobject;
 
-import java.util.Set;
+/**
+ * Tipos de solicitud académica reconocidos por el sistema.
+ *
+ * <p>Catálogo definido en RF-02. Cada tipo determina el tratamiento
+ * diferenciado que recibirá la solicitud durante su ciclo de vida.</p>
+ */
+public enum TipoSolicitud {
 
-public record TipoSolicitud(String valor) {
+    /** Solicitud para registrar o modificar asignaturas en el período vigente. */
+    REGISTRO_ASIGNATURA    ("Registro de asignatura"),
 
-    private static final Set<String> TIPOS_VALIDOS = Set.of(
-            "HOMOLOGACION",
-            "REGISTRO_ASIGNATURA",
-            "CANCELACION",
-            "CUPO",
-            "CONSULTA_ACADEMICA"
-    );
+    /** Solicitud para homologar una materia cursada en otra institución o programa. */
+    HOMOLOGACION           ("Homologación"),
 
-    public TipoSolicitud {
-        if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("El tipo de solicitud no puede estar vacío");
-        }
+    /** Solicitud para cancelar una asignatura dentro del período académico. */
+    CANCELACION_ASIGNATURA ("Cancelación de asignatura"),
 
-        if (!TIPOS_VALIDOS.contains(valor)) {
-            throw new IllegalArgumentException("Tipo de solicitud inválido");
-        }
-    }
+    /** Solicitud de cupo en una asignatura con capacidad limitada. */
+    SOLICITUD_CUPO         ("Solicitud de cupo"),
+
+    /** Consulta o inquietud académica que no implica trámite formal. */
+    CONSULTA_ACADEMICA     ("Consulta académica");
+
+    private final String descripcion;
+
+    TipoSolicitud(String descripcion) { this.descripcion = descripcion; }
+
+    /** @return Descripción legible del tipo de trámite. */
+    public String getDescripcion() { return descripcion; }
 }

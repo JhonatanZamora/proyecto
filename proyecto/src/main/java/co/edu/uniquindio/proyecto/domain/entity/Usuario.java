@@ -1,37 +1,124 @@
 package co.edu.uniquindio.proyecto.domain.entity;
 
+import co.edu.uniquindio.proyecto.domain.valueobject.DocumentoIdentidad;
+import co.edu.uniquindio.proyecto.domain.valueobject.Email;
+import co.edu.uniquindio.proyecto.domain.valueobject.Rol;
 import lombok.Getter;
 
-import java.util.UUID;
+import java.util.Objects;
 
+/**
+ * Entidad que representa a un usuario del sistema académico.
+ *
+ * <p>Es una Entidad porque cada usuario tiene identidad propia definida
+ * por su documento. Dos usuarios con el mismo nombre pero distinto
+ * documento son personas distintas.</p>
+ *
+ * <p>El rol determina qué operaciones puede realizar el usuario
+ * en el sistema (RF-13).</p>
+ *
+ * @see DocumentoIdentidad
+ * @see Rol
+ */
+@Getter
 public class Usuario {
 
-    @Getter
-    private final UUID id;
-    @Getter
-    private final String nombre;
-    private boolean activo;
+    /** Documento de identidad — define la identidad del usuario. */
+    private final DocumentoIdentidad documento;
 
-    public Usuario(UUID id, String nombre) {
+    /** Nombre completo del usuario. */
+    private final String nombreCompleto;
 
-        if (id == null) {
-            throw new IllegalArgumentException("El ID no puede ser null");
+    /** Dirección de correo electrónico institucional. */
+    private final Email email;
+
+    /** Rol funcional dentro del sistema académico. */
+    private final Rol rol;
+
+    /**
+     * Crea un nuevo usuario con todos sus datos obligatorios.
+     *
+     * @param documento      Documento de identidad del usuario.
+     * @param nombreCompleto Nombre completo.
+     * @param email          Correo electrónico institucional.
+     * @param rol            Rol funcional en el sistema.
+     */
+    public Usuario(DocumentoIdentidad documento,
+                   String nombreCompleto,
+                   Email email,
+                   Rol rol) {
+
+        if (documento == null) {
+            throw new IllegalArgumentException("El documento es obligatorio.");
+        }
+        if (nombreCompleto == null || nombreCompleto.isBlank()) {
+            throw new IllegalArgumentException("El nombre es obligatorio.");
+        }
+        if (email == null) {
+            throw new IllegalArgumentException("El email es obligatorio.");
+        }
+        if (rol == null) {
+            throw new IllegalArgumentException("El rol es obligatorio.");
         }
 
-        if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre no puede estar vacío");
-        }
-
-        this.id = id;
-        this.nombre = nombre;
-        this.activo = true;
+        this.documento      = documento;
+        this.nombreCompleto = nombreCompleto.trim();
+        this.email          = email;
+        this.rol            = rol;
     }
 
-    public boolean estaActivo() {
-        return activo;
+    // -------------------------------------------------------------------------
+    // Comportamientos del dominio — RF-13
+    // -------------------------------------------------------------------------
+
+    /**
+     * Indica si este usuario puede registrar solicitudes académicas.
+     *
+     * @return {@code true} si el rol es ESTUDIANTE.
+     */
+    public boolean puedeRegistrarSolicitudes() {
+        return this.rol == Rol.ESTUDIANTE;
     }
 
-    public void desactivar() {
-        this.activo = false;
+    /**
+     * Indica si este usuario puede ser asignado como responsable.
+     *
+     * @return {@code true} si el rol es DOCENTE o COORDINADOR.
+     */
+    public boolean puedeSerResponsable() {
+        return this.rol == Rol.DOCENTE || this.rol == Rol.COORDINADOR;
+    }
+
+    /**
+     * Indica si este usuario puede clasificar y priorizar solicitudes.
+     *
+     * @return {@code true} si el rol es COORDINADOR.
+     */
+    public boolean puedeClasificarSolicitudes() {
+        return this.rol == Rol.COORDINADOR;
+    }
+
+    // -------------------------------------------------------------------------
+    // Igualdad por documento — dos usuarios son el mismo si tienen
+    // el mismo tipo y número de documento
+    // -------------------------------------------------------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Usuario u)) return false;
+        return Objects.equals(documento, u.documento);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(documento);
+    }
+
+    @Override
+    public String toString() {
+        return "Usuario{doc=" + documento.tipo() + " " + documento.numero() +
+                ", nombre='" + nombreCompleto +
+                "', rol=" + rol + "}";
     }
 }
