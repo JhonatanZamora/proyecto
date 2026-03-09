@@ -1,71 +1,56 @@
 package co.edu.uniquindio.proyecto.domain.valueobject;
 
-import lombok.Getter;
-
 import java.util.UUID;
 
 /**
- * Value Object que representa el identificador único de una Solicitud.
+ * Identificador único e inmutable de una solicitud académica.
  *
- * ¿Por qué no usar String directamente?
- * Porque un String puede ser cualquier cosa — un nombre, un número, un error.
- * CodigoSolicitud garantiza que siempre es un UUID válido y con significado
- * en el dominio. El compilador distingue un CodigoSolicitud de un String suelto.
+ * <p>Encapsula la generación y validación del código, evitando que
+ * otras capas manipulen cadenas sin significado explícito.</p>
  *
- * Principio aplicado: Primitive Obsession — evitar usar tipos primitivos
- * para representar conceptos del dominio.
+ * <p>Ejemplos de uso:</p>
+ * <pre>{@code
+ *   CodigoSolicitud nuevo     = CodigoSolicitud.generar();
+ *   CodigoSolicitud existente = CodigoSolicitud.de("550e8400-e29b-...");
+ *
+ *   nuevo.valor(); // → "550e8400-e29b-41d4-a716-446655440000"
+ * }</pre>
+ *
+ * @param valor Cadena no vacía que representa el código único.
  */
-@Getter
-public final class CodigoSolicitud {
-
-    private final String valor;
+public record CodigoSolicitud(String valor) {
 
     /**
-     * Constructor privado — la creación se hace solo por los métodos de fábrica.
-     * Nadie puede crear un CodigoSolicitud inválido desde fuera.
+     * Constructor compacto — valida que el valor no esté vacío y elimina espacios.
      */
-    private CodigoSolicitud(String valor) {
-        this.valor = valor;
+    public CodigoSolicitud {
+        if (valor == null || valor.isBlank()) {
+            throw new IllegalArgumentException("El código no puede estar vacío.");
+        }
+        valor = valor.trim();
     }
 
     /**
-     * Genera un nuevo código único automáticamente.
-     * Se usa al registrar una solicitud nueva.
+     * Crea un nuevo código generando un UUID aleatorio.
      *
-     * Ejemplo: CodigoSolicitud.generar()
+     * <p>Úsalo cuando se registra una nueva solicitud.</p>
+     *
+     * @return Nueva instancia con un UUID único como valor.
      */
     public static CodigoSolicitud generar() {
         return new CodigoSolicitud(UUID.randomUUID().toString());
     }
 
     /**
-     * Reconstruye un código a partir de un valor existente.
-     * Se usa al recuperar una solicitud desde la base de datos.
+     * Reconstruye un código a partir de un valor ya existente.
      *
-     * @param valor UUID en formato String. No puede ser nulo ni vacío.
+     * <p>Úsalo cuando se carga una solicitud desde la base de datos.</p>
+     *
+     * @param valor Cadena del código existente.
+     * @return Instancia que representa el código existente.
+     * @throws IllegalArgumentException si el valor es nulo o vacío.
      */
     public static CodigoSolicitud de(String valor) {
-        if (valor == null || valor.isBlank()) {
-            throw new IllegalArgumentException("El código de solicitud no puede estar vacío.");
-        }
-        return new CodigoSolicitud(valor.trim());
-    }
-
-    // Value Objects se comparan por valor, nunca por referencia
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CodigoSolicitud that)) return false;
-        return valor.equals(that.valor);
-    }
-
-    @Override
-    public int hashCode() {
-        return valor.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return valor;
+        return new CodigoSolicitud(valor);
     }
 }
