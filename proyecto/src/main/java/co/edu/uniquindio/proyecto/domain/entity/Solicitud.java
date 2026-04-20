@@ -121,6 +121,55 @@ public class Solicitud {
         );
     }
 
+    /**
+     * Constructor para uso de la capa de aplicación con código generado externamente.
+     * Permite que {@code GeneradorCodigosService} controle la generación del código.
+     */
+    public Solicitud(CodigoSolicitud codigo,
+                     Usuario solicitante,
+                     TipoSolicitud tipoSolicitud,
+                     String descripcion,
+                     CanalOrigen canalOrigen) {
+
+        if (codigo == null) {
+            throw new IllegalArgumentException("El código es obligatorio.");
+        }
+        if (solicitante == null) {
+            throw new IllegalArgumentException("El solicitante es obligatorio.");
+        }
+        if (tipoSolicitud == null) {
+            throw new IllegalArgumentException("El tipo de solicitud es obligatorio.");
+        }
+        if (descripcion == null || descripcion.isBlank()) {
+            throw new IllegalArgumentException("La descripción es obligatoria (RF-01).");
+        }
+        if (canalOrigen == null) {
+            throw new IllegalArgumentException("El canal de origen es obligatorio (RF-01).");
+        }
+        if (!solicitante.puedeRegistrarSolicitudes()) {
+            throw new ReglaNegocioException(
+                    "Solo los estudiantes pueden registrar solicitudes (RF-13)."
+            );
+        }
+
+        this.codigo        = codigo;
+        this.fechaRegistro = LocalDateTime.now();
+        this.solicitante   = solicitante;
+        this.tipoSolicitud = tipoSolicitud;
+        this.descripcion   = descripcion.trim();
+        this.canalOrigen   = canalOrigen;
+        this.estado        = EstadoSolicitud.REGISTRADA;
+        this.historial     = new ArrayList<>();
+
+        registrarEvento(
+                null,
+                EstadoSolicitud.REGISTRADA,
+                "Solicitud registrada.",
+                "Canal: " + canalOrigen.getDescripcion(),
+                solicitante.getDocumento().numero()
+        );
+    }
+
     // -------------------------------------------------------------------------
     // Comportamientos del dominio
     // -------------------------------------------------------------------------
@@ -299,6 +348,50 @@ public class Solicitud {
                     "La solicitud '" + this.codigo + "' está cerrada y no puede modificarse."
             );
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Reconstrucción desde persistencia (no ejecuta reglas de negocio)
+    // -------------------------------------------------------------------------
+
+    public static Solicitud reconstruirDesdeDB(CodigoSolicitud codigo,
+                                               LocalDateTime fechaRegistro,
+                                               Usuario solicitante,
+                                               TipoSolicitud tipoSolicitud,
+                                               String descripcion,
+                                               CanalOrigen canalOrigen,
+                                               EstadoSolicitud estado,
+                                               Prioridad prioridad,
+                                               String justificacionPrioridad,
+                                               Usuario responsable,
+                                               List<EventoHistorial> historial) {
+        return new Solicitud(codigo, fechaRegistro, solicitante, tipoSolicitud,
+                descripcion, canalOrigen, estado, prioridad, justificacionPrioridad,
+                responsable, historial);
+    }
+
+    private Solicitud(CodigoSolicitud codigo,
+                      LocalDateTime fechaRegistro,
+                      Usuario solicitante,
+                      TipoSolicitud tipoSolicitud,
+                      String descripcion,
+                      CanalOrigen canalOrigen,
+                      EstadoSolicitud estado,
+                      Prioridad prioridad,
+                      String justificacionPrioridad,
+                      Usuario responsable,
+                      List<EventoHistorial> historial) {
+        this.codigo               = codigo;
+        this.fechaRegistro        = fechaRegistro;
+        this.solicitante          = solicitante;
+        this.tipoSolicitud        = tipoSolicitud;
+        this.descripcion          = descripcion;
+        this.canalOrigen          = canalOrigen;
+        this.estado               = estado;
+        this.prioridad            = prioridad;
+        this.justificacionPrioridad = justificacionPrioridad;
+        this.responsable          = responsable;
+        this.historial            = new ArrayList<>(historial != null ? historial : List.of());
     }
 
     // -------------------------------------------------------------------------
