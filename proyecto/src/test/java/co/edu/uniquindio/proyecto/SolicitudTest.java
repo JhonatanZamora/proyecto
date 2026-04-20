@@ -72,7 +72,7 @@ class SolicitudTest {
         // Assert
         assertEquals(1, solicitud.getHistorial().size());
         assertEquals(EstadoSolicitud.REGISTRADA,
-                solicitud.getHistorial().get(0).getEstadoNuevo());
+                solicitud.getHistorial().get(0).estadoNuevo());
     }
 
     // -------------------------------------------------------------------------

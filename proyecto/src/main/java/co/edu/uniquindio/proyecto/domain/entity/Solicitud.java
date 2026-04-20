@@ -283,7 +283,8 @@ public class Solicitud {
                                  String observaciones,
                                  String documentoResponsable) {
         historial.add(new EventoHistorial(
-                anterior, nuevo, descripcion, observaciones, documentoResponsable
+                anterior, nuevo, descripcion, observaciones,
+                LocalDateTime.now(), documentoResponsable
         ));
     }
 
