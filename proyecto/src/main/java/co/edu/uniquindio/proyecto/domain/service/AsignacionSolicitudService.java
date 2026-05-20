@@ -4,6 +4,7 @@ import co.edu.uniquindio.proyecto.domain.entity.Solicitud;
 import co.edu.uniquindio.proyecto.domain.entity.Usuario;
 import co.edu.uniquindio.proyecto.domain.exception.ReglaNegocioException;
 import co.edu.uniquindio.proyecto.domain.valueobject.Prioridad;
+import org.springframework.stereotype.Component;
 
 /**
  * Servicio de Dominio — Clasificación y asignación de solicitudes.
@@ -14,6 +15,7 @@ import co.edu.uniquindio.proyecto.domain.valueobject.Prioridad;
  *
  * <p>No contiene lógica técnica — solo lógica del negocio.</p>
  */
+@Component
 public class AsignacionSolicitudService {
 
     /**
